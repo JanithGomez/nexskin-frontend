@@ -1,150 +1,12 @@
-// "use client";
-// import { allProducts } from "@/data/products";
-// import { openCartModal } from "@/utlis/openCartModal";
-// // import { openCart } from "@/utlis/toggleCart";
-// import React, { useEffect } from "react";
-// import { useContext, useState } from "react";
-// const dataContext = React.createContext();
-// export const useContextElement = () => {
-//   return useContext(dataContext);
-// };
-
-// export default function Context({ children }) {
-//   const [cartProducts, setCartProducts] = useState([]);
-//   const [wishList, setWishList] = useState([1, 2, 3]);
-//   const [compareItem, setCompareItem] = useState([1, 2, 3]);
-//   const [quickViewItem, setQuickViewItem] = useState(allProducts[0]);
-//   const [quickAddItem, setQuickAddItem] = useState(1);
-//   const [totalPrice, setTotalPrice] = useState(0);
-//   useEffect(() => {
-//     const subtotal = cartProducts.reduce((accumulator, product) => {
-//       return accumulator + product.quantity * product.price;
-//     }, 0);
-//     setTotalPrice(subtotal);
-//   }, [cartProducts]);
-
-//   const addProductToCart = (id, qty) => {
-//     if (!cartProducts.filter((elm) => elm.id == id)[0]) {
-//       const item = {
-//         ...allProducts.filter((elm) => elm.id == id)[0],
-//         quantity: qty ? qty : 1,
-//       };
-//       setCartProducts((pre) => [...pre, item]);
-//       openCartModal();
-
-//       // openCart();
-//     }
-//   };
-//   const isAddedToCartProducts = (id) => {
-//     if (cartProducts.filter((elm) => elm.id == id)[0]) {
-//       return true;
-//     }
-//     return false;
-//   };
-
-//   const updateQuantity = (id, qty) => {
-//     if (isAddedToCartProducts(id)) {
-//       let item = cartProducts.filter((elm) => elm.id == id)[0];
-//       let items = [...cartProducts];
-//       const itemIndex = items.indexOf(item);
-
-//       item.quantity = qty / 1;
-//       items[itemIndex] = item;
-//       setCartProducts(items);
-
-//       openCartModal();
-//     } else {
-//       addProductToCart(id, qty);
-//     }
-//   };
-//   const addToWishlist = (id) => {
-//     if (!wishList.includes(id)) {
-//       setWishList((pre) => [...pre, id]);
-//     } else {
-//       setWishList((pre) => [...pre].filter((elm) => elm != id));
-//     }
-//   };
-//   const removeFromWishlist = (id) => {
-//     if (wishList.includes(id)) {
-//       setWishList((pre) => [...pre.filter((elm) => elm != id)]);
-//     }
-//   };
-//   const addToCompareItem = (id) => {
-//     if (!compareItem.includes(id)) {
-//       setCompareItem((pre) => [...pre, id]);
-//     }
-//   };
-//   const removeFromCompareItem = (id) => {
-//     if (compareItem.includes(id)) {
-//       setCompareItem((pre) => [...pre.filter((elm) => elm != id)]);
-//     }
-//   };
-//   const isAddedtoWishlist = (id) => {
-//     if (wishList.includes(id)) {
-//       return true;
-//     }
-//     return false;
-//   };
-//   const isAddedtoCompareItem = (id) => {
-//     if (compareItem.includes(id)) {
-//       return true;
-//     }
-//     return false;
-//   };
-//   useEffect(() => {
-//     const items = JSON.parse(localStorage.getItem("cartList"));
-//     if (items?.length) {
-//       setCartProducts(items);
-//     }
-//   }, []);
-
-//   useEffect(() => {
-//     localStorage.setItem("cartList", JSON.stringify(cartProducts));
-//   }, [cartProducts]);
-//   useEffect(() => {
-//     const items = JSON.parse(localStorage.getItem("wishlist"));
-//     if (items?.length) {
-//       setWishList(items);
-//     }
-//   }, []);
-
-//   useEffect(() => {
-//     localStorage.setItem("wishlist", JSON.stringify(wishList));
-//   }, [wishList]);
-
-//   const contextElement = {
-//     cartProducts,
-//     setCartProducts,
-//     totalPrice,
-//     addProductToCart,
-//     isAddedToCartProducts,
-//     removeFromWishlist,
-//     addToWishlist,
-//     isAddedtoWishlist,
-//     quickViewItem,
-//     wishList,
-//     setQuickViewItem,
-//     quickAddItem,
-//     setQuickAddItem,
-//     addToCompareItem,
-//     isAddedtoCompareItem,
-//     removeFromCompareItem,
-//     compareItem,
-//     setCompareItem,
-//     updateQuantity,
-//   };
-//   return (
-//     <dataContext.Provider value={contextElement}>
-//       {children}
-//     </dataContext.Provider>
-//   );
-// }
-
 'use client';
+
 import { allProducts } from '@/data/products';
 import { openCartModal } from '@/utlis/openCartModal';
 import React, { useEffect, useState, useContext } from 'react';
 import { fetchMe, logoutUser } from '@/src/lib/auth';
+
+import { fetchCart, addCartItem, updateCartItem, removeCartItem } from '@/src/lib/api';
+import { cldCard, productPlaceholder } from '@/src/lib/cloudinary';
 
 const dataContext = React.createContext();
 export const useContextElement = () => useContext(dataContext);
@@ -163,7 +25,7 @@ export default function Context({ children }) {
       try {
         const me = await fetchMe();
         if (!cancelled) setUser(me);
-      } catch (e) {
+      } catch {
         if (!cancelled) setUser(null);
       } finally {
         if (!cancelled) setAuthLoading(false);
@@ -178,10 +40,11 @@ export default function Context({ children }) {
   const logout = async () => {
     await logoutUser();
     setUser(null);
+    await loadCart();
   };
 
   // -------------------------
-  // ✅ CART / WISHLIST / COMPARE (your existing)
+  // ✅ CART / WISHLIST / COMPARE
   // -------------------------
   const [cartProducts, setCartProducts] = useState([]);
   const [wishList, setWishList] = useState([1, 2, 3]);
@@ -190,82 +53,108 @@ export default function Context({ children }) {
   const [quickAddItem, setQuickAddItem] = useState(1);
   const [totalPrice, setTotalPrice] = useState(0);
 
+  // ✅ Load cart from backend
+  const loadCart = async () => {
+    try {
+      const json = await fetchCart();
+      const items = json?.items ?? [];
+
+      const mapped = items.map((i) => ({
+        item_id: i.item_id,
+        id: i.id,
+        title: i.title,
+        price: Number(i.price || 0),
+        quantity: Number(i.quantity || 1),
+        imgSrc: i.imgPublicId ? cldCard(i.imgPublicId) : productPlaceholder(),
+      }));
+
+      setCartProducts(mapped);
+      setTotalPrice(Number(json?.subtotal || 0));
+    } catch (e) {
+      console.error('loadCart failed:', e);
+      setCartProducts([]);
+      setTotalPrice(0);
+    }
+  };
+
   useEffect(() => {
-    const subtotal = cartProducts.reduce((accumulator, product) => {
-      return accumulator + product.quantity * product.price;
-    }, 0);
-    setTotalPrice(subtotal);
-  }, [cartProducts]);
+    loadCart();
+  }, []);
 
-  const addProductToCart = (id, qty) => {
-    if (!cartProducts.filter((elm) => elm.id == id)[0]) {
-      const item = {
-        ...allProducts.filter((elm) => elm.id == id)[0],
-        quantity: qty ? qty : 1,
-      };
-      setCartProducts((pre) => [...pre, item]);
-      openCartModal();
+  useEffect(() => {
+    if (!authLoading) loadCart();
+  }, [authLoading, user?.id]);
+
+  const isAddedToCartProducts = (id) => !!cartProducts.find((p) => String(p.id) === String(id));
+
+  // -------------------------
+  // ✅ ADD TO CART (opens modal)
+  // -------------------------
+  const addProductToCart = async (id, qty) => {
+    try {
+      await addCartItem(id, qty || 1);
+      await loadCart();
+      openCartModal(); // ✅ ONLY here
+    } catch (e) {
+      console.error('addProductToCart failed:', e);
     }
   };
 
-  const isAddedToCartProducts = (id) => {
-    if (cartProducts.filter((elm) => elm.id == id)[0]) return true;
-    return false;
-  };
+  // -------------------------
+  // ✅ UPDATE QUANTITY (NO modal reopen)
+  // -------------------------
+  const updateQuantity = async (productId, qty) => {
+    const item = cartProducts.find((p) => String(p.id) === String(productId));
+    if (!item?.item_id) {
+      return addProductToCart(productId, qty);
+    }
 
-  const updateQuantity = (id, qty) => {
-    if (isAddedToCartProducts(id)) {
-      let item = cartProducts.filter((elm) => elm.id == id)[0];
-      let items = [...cartProducts];
-      const itemIndex = items.indexOf(item);
-
-      item.quantity = qty / 1;
-      items[itemIndex] = item;
-      setCartProducts(items);
-
-      openCartModal();
-    } else {
-      addProductToCart(id, qty);
+    try {
+      await updateCartItem(item.item_id, qty);
+      await loadCart(); // ✅ silent update
+    } catch (e) {
+      console.error('updateQuantity failed:', e);
     }
   };
 
+  // -------------------------
+  // ✅ REMOVE ITEM
+  // -------------------------
+  const removeFromCartByProductId = async (productId) => {
+    const item = cartProducts.find((p) => String(p.id) === String(productId));
+    if (!item?.item_id) return;
+
+    try {
+      await removeCartItem(item.item_id);
+      await loadCart();
+    } catch (e) {
+      console.error('removeFromCart failed:', e);
+    }
+  };
+
+  // -------------------------
+  // WISHLIST / COMPARE
+  // -------------------------
   const addToWishlist = (id) => {
-    if (!wishList.includes(id)) {
-      setWishList((pre) => [...pre, id]);
-    } else {
-      setWishList((pre) => [...pre].filter((elm) => elm != id));
-    }
+    setWishList((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   };
 
   const removeFromWishlist = (id) => {
-    if (wishList.includes(id)) {
-      setWishList((pre) => [...pre.filter((elm) => elm != id)]);
-    }
+    setWishList((prev) => prev.filter((x) => x !== id));
   };
 
   const addToCompareItem = (id) => {
     if (!compareItem.includes(id)) {
-      setCompareItem((pre) => [...pre, id]);
+      setCompareItem((prev) => [...prev, id]);
     }
   };
 
   const removeFromCompareItem = (id) => {
-    if (compareItem.includes(id)) {
-      setCompareItem((pre) => [...pre.filter((elm) => elm != id)]);
-    }
+    setCompareItem((prev) => prev.filter((x) => x !== id));
   };
 
   const isAddedtoWishlist = (id) => wishList.includes(id);
   const isAddedtoCompareItem = (id) => compareItem.includes(id);
-
-  useEffect(() => {
-    const items = JSON.parse(localStorage.getItem('cartList'));
-    if (items?.length) setCartProducts(items);
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem('cartList', JSON.stringify(cartProducts));
-  }, [cartProducts]);
 
   useEffect(() => {
     const items = JSON.parse(localStorage.getItem('wishlist'));
@@ -276,20 +165,23 @@ export default function Context({ children }) {
     localStorage.setItem('wishlist', JSON.stringify(wishList));
   }, [wishList]);
 
-  // ✅ Provide everything
+  // -------------------------
+  // PROVIDER
+  // -------------------------
   const contextElement = {
-    // auth
     user,
     setUser,
     authLoading,
     logout,
 
-    // existing
     cartProducts,
     setCartProducts,
     totalPrice,
     addProductToCart,
     isAddedToCartProducts,
+    updateQuantity,
+    removeFromCartByProductId,
+
     removeFromWishlist,
     addToWishlist,
     isAddedtoWishlist,
@@ -303,7 +195,6 @@ export default function Context({ children }) {
     removeFromCompareItem,
     compareItem,
     setCompareItem,
-    updateQuantity,
   };
 
   return <dataContext.Provider value={contextElement}>{children}</dataContext.Provider>;

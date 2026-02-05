@@ -15,7 +15,7 @@ export default function Header2({ textClass, bgColor = '', uppercase = false, is
   const loadAuthFromStorage = () => {
     try {
       const rawUser = localStorage.getItem('auth_user');
-      const rawToken = localStorage.getItem('auth_token');
+      const rawToken = localStorage.getItem('auth_token'); // ✅ use the same key everywhere
       setUser(rawUser ? JSON.parse(rawUser) : null);
       setToken(rawToken || null);
     } catch {
@@ -37,24 +37,29 @@ export default function Header2({ textClass, bgColor = '', uppercase = false, is
     try {
       setLoggingOut(true);
 
-      // optional: call backend logout if you use token auth
-      if (token) {
-        await apiLogout(token);
-      }
+      // ✅ backend logout (token)
+      // apiLogout reads auth_token internally (from src/lib/api.js)
+      await apiLogout();
 
+      // ✅ clear auth keys used by Login/Register components
       localStorage.removeItem('auth_user');
       localStorage.removeItem('auth_token');
+
+      // ✅ cleanup old keys if you used them before (optional but helpful)
+      localStorage.removeItem('token');
+
       setUser(null);
       setToken(null);
 
-      // close dropdown if open (bootstrap)
-      // not required, but nice UX
-      const bs = require('bootstrap');
-      const toggles = document.querySelectorAll('[data-bs-toggle="dropdown"]');
-      toggles.forEach((t) => {
-        const inst = bs.Dropdown.getInstance(t);
-        if (inst) inst.hide();
-      });
+      // close dropdown if open (bootstrap) - optional UX
+      try {
+        const bs = require('bootstrap');
+        const toggles = document.querySelectorAll('[data-bs-toggle="dropdown"]');
+        toggles.forEach((t) => {
+          const inst = bs.Dropdown.getInstance(t);
+          if (inst) inst.hide();
+        });
+      } catch {}
 
       window.dispatchEvent(new Event('auth:changed'));
     } catch (e) {
@@ -111,7 +116,7 @@ export default function Header2({ textClass, bgColor = '', uppercase = false, is
                 </a>
               </li>
 
-              {/* ✅ account */}
+              {/* account */}
               <li className="nav-account dropdown">
                 {!user ? (
                   // Logged out -> open Login modal
@@ -136,9 +141,11 @@ export default function Header2({ textClass, bgColor = '', uppercase = false, is
                         <div style={{ fontWeight: 600 }}>{user?.name || 'Customer'}</div>
                         <div style={{ fontSize: 12, opacity: 0.7 }}>{user?.email}</div>
                       </li>
+
                       <li>
                         <hr className="dropdown-divider" />
                       </li>
+
                       <li>
                         <Link className="dropdown-item" href="/account">
                           My Account
@@ -149,9 +156,11 @@ export default function Header2({ textClass, bgColor = '', uppercase = false, is
                           Orders
                         </Link>
                       </li>
+
                       <li>
                         <hr className="dropdown-divider" />
                       </li>
+
                       <li>
                         <button
                           className="dropdown-item"

@@ -197,8 +197,9 @@ export default function DetailsOuterZoom({ product = allProducts[0] }) {
                     <form onSubmit={(e) => e.preventDefault()} className="">
                       <a
                         onClick={() => {
-                          openCartModal();
-                          addProductToCart(product.id, quantity ? quantity : 1);
+                          // openCartModal();
+                          // addProductToCart(product.id, quantity ? quantity : 1);
+                          addProductToCart(product.id, quantity);
                         }}
                         className="tf-btn btn-fill justify-content-center fw-6 fs-16 flex-grow-1 animate-hover-btn">
                         <span>{isAddedToCartProducts(product.id) ? 'Already Added' : 'Add to cart'} - </span>

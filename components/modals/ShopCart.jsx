@@ -7,20 +7,29 @@ import { useRef } from 'react';
 import { Pagination } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
 export default function ShopCart() {
-  const { cartProducts, totalPrice, setCartProducts, setQuickViewItem } = useContextElement();
+  // const { cartProducts, totalPrice, setCartProducts, setQuickViewItem } = useContextElement();
+  const { cartProducts, totalPrice, updateQuantity, removeFromCartByProductId, setQuickViewItem } = useContextElement();
+
+  // const setQuantity = (id, quantity) => {
+  //   if (quantity >= 1) {
+  //     const item = cartProducts.filter((elm) => elm.id == id)[0];
+  //     const items = [...cartProducts];
+  //     const itemIndex = items.indexOf(item);
+  //     item.quantity = quantity;
+  //     items[itemIndex] = item;
+  //     setCartProducts(items);
+  //   }
+  // };
+  // const removeItem = (id) => {
+  //   setCartProducts((pre) => [...pre.filter((elm) => elm.id != id)]);
+  // };
   const setQuantity = (id, quantity) => {
-    if (quantity >= 1) {
-      const item = cartProducts.filter((elm) => elm.id == id)[0];
-      const items = [...cartProducts];
-      const itemIndex = items.indexOf(item);
-      item.quantity = quantity;
-      items[itemIndex] = item;
-      setCartProducts(items);
-    }
-  };
-  const removeItem = (id) => {
-    setCartProducts((pre) => [...pre.filter((elm) => elm.id != id)]);
-  };
+      if (quantity >= 1) updateQuantity(id, quantity);
+    };
+
+    const removeItem = (id) => {
+      removeFromCartByProductId(id);
+    };
 
   const addNoteRef = useRef();
   const addGiftRef = useRef();

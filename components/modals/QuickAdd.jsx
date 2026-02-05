@@ -1,26 +1,19 @@
-"use client";
-import React, { useEffect, useState } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import Quantity from "../shopDetails/Quantity";
-import { useContextElement } from "@/context/Context";
+'use client';
+import React, { useEffect, useState } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import Quantity from '../shopDetails/Quantity';
+import { useContextElement } from '@/context/Context';
 
-import { allProducts } from "@/data/products";
-import { colors, sizeOptions } from "@/data/singleProductOptions";
+import { allProducts } from '@/data/products';
+import { colors, sizeOptions } from '@/data/singleProductOptions';
 export default function QuickAdd() {
-  const {
-    quickAddItem,
-    addProductToCart,
-    isAddedToCartProducts,
-    addToCompareItem,
-    isAddedtoCompareItem,
-  } = useContextElement();
+  const { quickAddItem, addProductToCart, isAddedToCartProducts, addToCompareItem, isAddedtoCompareItem } =
+    useContextElement();
   const [item, setItem] = useState(allProducts[0]);
   useEffect(() => {
     const filtered = allProducts.filter((el) => el.id == quickAddItem);
-    if (filtered) {
-      setItem(filtered[0]);
-    }
+    if (filtered.length) setItem(filtered[0]); // ✅
   }, [quickAddItem]);
   const [currentColor, setCurrentColor] = useState(colors[0]);
   const [currentSize, setCurrentSize] = useState(sizeOptions[0]);
@@ -30,21 +23,12 @@ export default function QuickAdd() {
       <div className="modal-dialog modal-dialog-centered">
         <div className="modal-content">
           <div className="header">
-            <span
-              className="icon-close icon-close-popup"
-              data-bs-dismiss="modal"
-            />
+            <span className="icon-close icon-close-popup" data-bs-dismiss="modal" />
           </div>
           <div className="wrap">
             <div className="tf-product-info-item">
               <div className="image">
-                <Image
-                  alt="image"
-                  style={{ objectFit: "contain" }}
-                  src={item.imgSrc}
-                  width={720}
-                  height={1005}
-                />
+                <Image alt="image" style={{ objectFit: 'contain' }} src={item.imgSrc} width={720} height={1005} />
               </div>
               <div className="content">
                 <Link href={`/product-detail/${item.id}`}>{item.title}</Link>
@@ -57,24 +41,16 @@ export default function QuickAdd() {
               <div className="variant-picker-item">
                 <div className="variant-picker-label">
                   Color:
-                  <span className="fw-6 variant-picker-label-value">
-                    {currentColor.value}
-                  </span>
+                  <span className="fw-6 variant-picker-label-value">{currentColor.value}</span>
                 </div>
                 <form className="variant-picker-values">
                   {colors.map((color) => (
                     <React.Fragment key={color.id}>
-                      <input
-                        type="radio"
-                        name="color1"
-                        readOnly
-                        checked={currentColor == color}
-                      />
+                      <input type="radio" name="color1" readOnly checked={currentColor == color} />
                       <label
                         onClick={() => setCurrentColor(color)}
                         className="hover-tooltip radius-60"
-                        data-value={color.value}
-                      >
+                        data-value={color.value}>
                         <span className={`btn-checkbox ${color.className}`} />
                         <span className="tooltip">{color.value}</span>
                       </label>
@@ -84,26 +60,13 @@ export default function QuickAdd() {
               </div>
               <div className="variant-picker-item">
                 <div className="variant-picker-label">
-                  Size:{" "}
-                  <span className="fw-6 variant-picker-label-value">
-                    {" "}
-                    {currentSize.value}
-                  </span>
+                  Size: <span className="fw-6 variant-picker-label-value"> {currentSize.value}</span>
                 </div>
                 <form className="variant-picker-values">
                   {sizeOptions.map((size) => (
                     <React.Fragment key={size.id}>
-                      <input
-                        type="radio"
-                        name="size1"
-                        readOnly
-                        checked={currentSize == size}
-                      />
-                      <label
-                        onClick={() => setCurrentSize(size)}
-                        className="style-text"
-                        data-value={size.value}
-                      >
+                      <input type="radio" name="size1" readOnly checked={currentSize == size} />
+                      <label onClick={() => setCurrentSize(size)} className="style-text" data-value={size.value}>
                         <p>{size.value}</p>
                       </label>
                     </React.Fragment>
@@ -119,13 +82,8 @@ export default function QuickAdd() {
               <form onSubmit={(e) => e.preventDefault()} className="">
                 <a
                   className="tf-btn btn-fill justify-content-center fw-6 fs-16 flex-grow-1 animate-hover-btn"
-                  onClick={() => addProductToCart(item.id)}
-                >
-                  <span>
-                    {isAddedToCartProducts(item.id)
-                      ? "Already Added - "
-                      : "Add to cart - "}
-                  </span>
+                  onClick={() => addProductToCart(item.id)}>
+                  <span>{isAddedToCartProducts(item.id) ? 'Already Added - ' : 'Add to cart - '}</span>
                   <span className="tf-qty-price">${item.price.toFixed(2)}</span>
                 </a>
                 <div className="tf-product-btn-wishlist btn-icon-action">
@@ -137,20 +95,14 @@ export default function QuickAdd() {
                   data-bs-toggle="offcanvas"
                   aria-controls="offcanvasLeft"
                   onClick={() => addToCompareItem(item.id)}
-                  className="tf-product-btn-wishlist box-icon bg_white compare btn-icon-action"
-                >
+                  className="tf-product-btn-wishlist box-icon bg_white compare btn-icon-action">
                   <span className="icon icon-compare" />
                   <span className="icon icon-check" />
                 </a>
                 <div className="w-100">
                   <a href="#" className="btns-full">
                     Buy with
-                    <Image
-                      alt="image"
-                      src="/images/payments/paypal.png"
-                      width={64}
-                      height={18}
-                    />
+                    <Image alt="image" src="/images/payments/paypal.png" width={64} height={18} />
                   </a>
                   <a href="#" className="payment-more-option">
                     More payment options

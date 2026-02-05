@@ -14,6 +14,7 @@ export const ProductCard = ({ product }) => {
     isAddedtoWishlist,
     addToCompareItem,
     isAddedtoCompareItem,
+    addProductToCart, // ✅ add
   } = useContextElement();
 
   const imgSrc = cldCard(product.imgPublicId) || productPlaceholder();
@@ -35,7 +36,6 @@ export const ProductCard = ({ product }) => {
             alt={product.title || 'image-product'}
             width={720}
             height={1005}
-            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
           />
           <Image
             className="lazyload img-hover"
@@ -43,7 +43,6 @@ export const ProductCard = ({ product }) => {
             alt={product.title || 'image-product'}
             width={720}
             height={1005}
-            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
           />
         </Link>
 
@@ -54,16 +53,29 @@ export const ProductCard = ({ product }) => {
         ) : (
           <>
             <div className="list-product-btn">
+              {/* ✅ REAL add-to-cart (instant) */}
+              <a
+                onClick={() => addProductToCart(product.id, 1)}
+                className="box-icon bg_white quick-add tf-btn-loading"
+                style={{ cursor: 'pointer' }}>
+                <span className="icon icon-bag" />
+                <span className="tooltip">Add to cart</span>
+              </a>
+
+              {/* keep quick add modal if you want */}
               <a
                 href="#quick_add"
-                onClick={() => setQuickAddItem(product.id)}
+                onClick={() => setQuickAddItem(product)}
                 data-bs-toggle="modal"
                 className="box-icon bg_white quick-add tf-btn-loading">
                 <span className="icon icon-bag" />
                 <span className="tooltip">Quick Add</span>
               </a>
 
-              <a onClick={() => addToWishlist(product.id)} className="box-icon bg_white wishlist btn-icon-action">
+              <a
+                onClick={() => addToWishlist(product.id)}
+                className="box-icon bg_white wishlist btn-icon-action"
+                style={{ cursor: 'pointer' }}>
                 <span className={`icon icon-heart ${isAddedtoWishlist(product.id) ? 'added' : ''}`} />
                 <span className="tooltip">
                   {isAddedtoWishlist(product.id) ? 'Already Wishlisted' : 'Add to Wishlist'}
@@ -101,14 +113,6 @@ export const ProductCard = ({ product }) => {
                 </div>
               </div>
             )}
-
-            {product.sizes && (
-              <div className="size-list">
-                {product.sizes.map((size) => (
-                  <span key={size}>{size}</span>
-                ))}
-              </div>
-            )}
           </>
         )}
       </div>
@@ -117,7 +121,7 @@ export const ProductCard = ({ product }) => {
         <Link href={`/product-detail/${product.id}`} className="title link">
           {product.title}
         </Link>
-        <span className="price">LKR {product.price.toFixed(2)}</span>
+        <span className="price">LKR {Number(product.price || 0).toFixed(2)}</span>
       </div>
     </div>
   );
