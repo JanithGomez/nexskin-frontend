@@ -1,4 +1,5 @@
 // src/lib/auth.js
+import { fetchCart } from '@/src/lib/api';
 const BASE_URL = 'http://localhost:8000';
 const API_URL = `${BASE_URL}/api`;
 
@@ -34,6 +35,10 @@ export async function loginUser({ email, password }) {
   if (!res.ok) throw new Error(json?.message || 'Login failed');
 
   if (json?.token) setToken(json.token);
+  // ✅ trigger merge (backend will see token + same session)
+  try {
+    await fetchCart();
+  } catch {}
   return json?.user ?? null;
 }
 
@@ -51,6 +56,10 @@ export async function registerUser({ name, email, password, password_confirmatio
   }
 
   if (json?.token) setToken(json.token);
+  // ✅ trigger merge (backend will see token + same session)
+  try {
+    await fetchCart();
+  } catch {}
   return json?.user ?? null;
 }
 

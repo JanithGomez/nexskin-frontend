@@ -12,7 +12,7 @@ export default function ProductSinglePrevNext({ currentId = 1 }) {
         <i className="icon icon-arrow-left" />
         {/* <span className="tooltip">Cotton jersey top</span> */}
       </Link>
-      <a href="#" className="tf-breadcrumb-back hover-tooltip center">
+      <a href={`/shop-default`} className="tf-breadcrumb-back hover-tooltip center">
         <i className="icon icon-shop" />
         {/* <span className="tooltip">Back to Women</span> */}
       </a>

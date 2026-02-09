@@ -84,6 +84,13 @@ export async function fetchNavbar() {
   return res.json();
 }
 
+export async function fetchBestSellers(limit = 4) {
+  const res = await fetch(`${API_BASE_URL}/products/best-sellers?limit=${limit}`, { cache: 'no-store' });
+  if (!res.ok) return { products: [] };
+  const json = await res.json();
+  return { products: json.data ?? [] };
+}
+
 /* =========================================================
    PRODUCTS
    ========================================================= */

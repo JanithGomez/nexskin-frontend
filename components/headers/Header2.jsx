@@ -124,7 +124,6 @@ export default function Header2({ textClass, bgColor = '', uppercase = false, is
                     <i className="icon icon-account" />
                   </a>
                 ) : (
-                  // Logged in -> dropdown
                   <>
                     <a
                       href="#"
@@ -136,38 +135,79 @@ export default function Header2({ textClass, bgColor = '', uppercase = false, is
                       <i className="icon icon-account" />
                     </a>
 
-                    <ul className="dropdown-menu dropdown-menu-end p-2">
-                      <li className="px-3 py-2" style={{ minWidth: 220 }}>
-                        <div style={{ fontWeight: 600 }}>{user?.name || 'Customer'}</div>
-                        <div style={{ fontSize: 12, opacity: 0.7 }}>{user?.email}</div>
+                    <ul className="dropdown-menu dropdown-menu-end shadow-sm border-0 p-0" style={{ minWidth: 260 }}>
+                      {/* Header */}
+                      <li className="px-3 py-3 border-bottom" style={{ background: '#fff' }}>
+                        <div className="d-flex align-items-center gap-2">
+                          <div
+                            className="d-flex align-items-center justify-content-center rounded-circle"
+                            style={{
+                              width: 36,
+                              height: 36,
+                              background: 'rgba(0,0,0,0.06)',
+                              fontWeight: 700,
+                              textTransform: 'uppercase',
+                            }}>
+                            {user?.name?.[0] || 'C'}
+                          </div>
+
+                          <div className="lh-sm">
+                            <div style={{ fontWeight: 700 }}>{user?.name || 'Customer'}</div>
+                            <div style={{ fontSize: 12, opacity: 0.75 }}>{user?.email}</div>
+                          </div>
+                        </div>
                       </li>
 
-                      <li>
-                        <hr className="dropdown-divider" />
-                      </li>
+                      {/* Main links */}
+                      <li className="p-2">
+                        <Link className="dropdown-item d-flex align-items-center gap-2 rounded-2" href="/my-account">
+                          <i className="icon icon-account" />
+                          <span>My Account</span>
+                        </Link>
 
-                      <li>
-                        <Link className="dropdown-item" href="/account">
-                          My Account
+                        <Link
+                          className="dropdown-item d-flex align-items-center gap-2 rounded-2"
+                          href="/my-account-orders">
+                          <i className="icon icon-bag" />
+                          <span>Orders</span>
                         </Link>
                       </li>
+
                       <li>
-                        <Link className="dropdown-item" href="/orders">
-                          Orders
+                        <hr className="dropdown-divider my-0" />
+                      </li>
+
+                      {/* Support */}
+                      <li className="p-2">
+                        <Link className="dropdown-item d-flex align-items-center gap-2 rounded-2" href="/about-us">
+                          <i className="icon icon-info" />
+                          <span>About us</span>
+                        </Link>
+
+                        <Link className="dropdown-item d-flex align-items-center gap-2 rounded-2" href="/faq-2">
+                          <i className="icon icon-question" />
+                          <span>FAQ</span>
+                        </Link>
+
+                        <Link className="dropdown-item d-flex align-items-center gap-2 rounded-2" href="/contact-2">
+                          <i className="icon icon-mail" />
+                          <span>Contact</span>
                         </Link>
                       </li>
 
                       <li>
-                        <hr className="dropdown-divider" />
+                        <hr className="dropdown-divider my-0" />
                       </li>
 
-                      <li>
+                      {/* Logout */}
+                      <li className="p-2">
                         <button
-                          className="dropdown-item"
+                          className="dropdown-item d-flex align-items-center gap-2 rounded-2 text-danger"
                           onClick={handleLogout}
                           disabled={loggingOut}
                           style={{ cursor: loggingOut ? 'not-allowed' : 'pointer' }}>
-                          {loggingOut ? 'Logging out...' : 'Logout'}
+                          <i className="icon icon-logout" />
+                          <span>{loggingOut ? 'Logging out...' : 'Logout'}</span>
                         </button>
                       </li>
                     </ul>
