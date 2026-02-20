@@ -1,6 +1,6 @@
 // src/lib/auth.js
 import { fetchCart } from '@/src/lib/api';
-const BASE_URL = 'http://localhost:8000';
+const BASE_URL = 'http://backend.test';
 const API_URL = `${BASE_URL}/api`;
 
 function setToken(token) {

@@ -6,7 +6,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Pagination from '../common/Pagination';
 import ShopFilter from './ShopFilter';
 import Sorting from './Sorting';
-import fetchAllProducts from '@/src/lib/api';
+import { fetchAllProducts, fetchProductFilters } from '@/src/lib/api';
 
 export default function ShopDefault({ categorySlug = null }) {
   const [gridItems, setGridItems] = useState(6);
@@ -50,27 +50,43 @@ export default function ShopDefault({ categorySlug = null }) {
   }, []);
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/product-filters')
-      .then((res) => res.json())
-      .then((data) => setFilterData(data))
-      .catch((err) => console.error(err));
+    let cancelled = false;
+
+    async function loadFilters() {
+      try {
+        const data = await fetchProductFilters();
+        if (!cancelled) setFilterData(data);
+      } catch (err) {
+        console.error(err);
+        if (!cancelled) setFilterData(null);
+      }
+    }
+
+    loadFilters();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  const handleApplyFilters = useCallback((filters) => {
-    setCurrentPage(1);
+  const handleApplyFilters = useCallback(
+    (filters) => {
+      setCurrentPage(1);
 
-    // ✅ keep category_slug always if present
-    const merged = {
-      ...filters,
-      category_slug: categorySlug || undefined,
-    };
+      // ✅ keep category_slug always if present
+      const merged = {
+        ...filters,
+        category_slug: categorySlug || undefined,
+      };
 
-    setActiveFilters((prev) => {
-      const prevStr = JSON.stringify(prev);
-      const nextStr = JSON.stringify(merged);
-      return prevStr === nextStr ? prev : merged;
-    });
-  }, [categorySlug]);
+      setActiveFilters((prev) => {
+        const prevStr = JSON.stringify(prev);
+        const nextStr = JSON.stringify(merged);
+        return prevStr === nextStr ? prev : merged;
+      });
+    },
+    [categorySlug],
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -154,4 +170,3 @@ export default function ShopDefault({ categorySlug = null }) {
     </>
   );
 }
-
