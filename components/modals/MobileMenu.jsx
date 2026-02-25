@@ -302,7 +302,7 @@ export default function MobileMenu() {
                   go('/wishlist');
                 }}>
                 <i className="icon icon-heart" />
-                Wishlist
+                Wishlistttt
               </a>
 
               <a
