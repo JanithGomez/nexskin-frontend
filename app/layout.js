@@ -1,82 +1,82 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
-import "../public/scss/main.scss";
-import "photoswipe/dist/photoswipe.css";
-import "rc-slider/assets/index.css";
-import Context from "@/context/Context";
-import QuickView from "@/components/modals/QuickView";
-import ProductSidebar from "@/components/modals/ProductSidebar";
-import QuickAdd from "@/components/modals/QuickAdd";
-import Compare from "@/components/modals/Compare";
-import ShopCart from "@/components/modals/ShopCart";
-import AskQuestion from "@/components/modals/AskQuestion";
-import BlogSidebar from "@/components/modals/BlogSidebar";
-import ColorCompare from "@/components/modals/ColorCompare";
-import DeliveryReturn from "@/components/modals/DeliveryReturn";
-import FindSize from "@/components/modals/FindSize";
-import Login from "@/components/modals/Login";
-import MobileMenu from "@/components/modals/MobileMenu";
-import Register from "@/components/modals/Register";
-import ResetPass from "@/components/modals/ResetPass";
-import SearchModal from "@/components/modals/SearchModal";
-import ToolbarBottom from "@/components/modals/ToolbarBottom";
-import ToolbarShop from "@/components/modals/ToolbarShop";
+import '../public/scss/main.scss';
+import 'photoswipe/dist/photoswipe.css';
+import 'rc-slider/assets/index.css';
+import Context from '@/context/Context';
+import QuickView from '@/components/modals/QuickView';
+import ProductSidebar from '@/components/modals/ProductSidebar';
+import QuickAdd from '@/components/modals/QuickAdd';
+import Compare from '@/components/modals/Compare';
+import ShopCart from '@/components/modals/ShopCart';
+import AskQuestion from '@/components/modals/AskQuestion';
+import BlogSidebar from '@/components/modals/BlogSidebar';
+import ColorCompare from '@/components/modals/ColorCompare';
+import DeliveryReturn from '@/components/modals/DeliveryReturn';
+import FindSize from '@/components/modals/FindSize';
+import Login from '@/components/modals/Login';
+import MobileMenu from '@/components/modals/MobileMenu';
+import Register from '@/components/modals/Register';
+import ResetPass from '@/components/modals/ResetPass';
+import SearchModal from '@/components/modals/SearchModal';
+import ToolbarBottom from '@/components/modals/ToolbarBottom';
+import ToolbarShop from '@/components/modals/ToolbarShop';
 
-import { usePathname } from "next/navigation";
-import NewsletterModal from "@/components/modals/NewsletterModal";
-import ShareModal from "@/components/modals/ShareModal";
-import ScrollTop from "@/components/common/ScrollTop";
-import RtlToggle from "@/components/common/RtlToggle";
-import ReviewModal from "@/components/modals/ReviewModal";
+import { usePathname } from 'next/navigation';
+import NewsletterModal from '@/components/modals/NewsletterModal';
+import ShareModal from '@/components/modals/ShareModal';
+import ScrollTop from '@/components/common/ScrollTop';
+import RtlToggle from '@/components/common/RtlToggle';
+import ReviewModal from '@/components/modals/ReviewModal';
 
 export default function RootLayout({ children }) {
   const pathname = usePathname();
   useEffect(() => {
-    if (typeof window !== "undefined") {
+    if (typeof window !== 'undefined') {
       // Import the script only on the client side
-      import("bootstrap/dist/js/bootstrap.esm").then(() => {
+      import('bootstrap/dist/js/bootstrap.esm').then(() => {
         // Module is imported, you can access any exported functionality if
       });
     }
   }, []);
   useEffect(() => {
     const handleScroll = () => {
-      const header = document.querySelector("header");
+      const header = document.querySelector('header');
       if (window.scrollY > 100) {
-        header.classList.add("header-bg");
+        header.classList.add('header-bg');
       } else {
-        header.classList.remove("header-bg");
+        header.classList.remove('header-bg');
       }
     };
 
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener('scroll', handleScroll);
 
     // Cleanup function to remove event listener on component unmount
     return () => {
-      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener('scroll', handleScroll);
     };
   }, []); // Empty dependency array means this effect runs once on mount and cleans up on unmount
 
-  const [scrollDirection, setScrollDirection] = useState("down");
+  const [scrollDirection, setScrollDirection] = useState('down');
 
   useEffect(() => {
-    setScrollDirection("up");
+    setScrollDirection('up');
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
 
       if (currentScrollY > 250) {
         if (currentScrollY > lastScrollY.current) {
           // Scrolling down
-          setScrollDirection("down");
+          setScrollDirection('down');
         } else {
           // Scrolling up
-          setScrollDirection("up");
+          setScrollDirection('up');
         }
       } else {
         // Below 250px
-        setScrollDirection("down");
+        setScrollDirection('down');
       }
 
       lastScrollY.current = currentScrollY;
@@ -85,17 +85,17 @@ export default function RootLayout({ children }) {
     const lastScrollY = { current: window.scrollY };
 
     // Add scroll event listener
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener('scroll', handleScroll);
 
     // Cleanup: remove event listener when component unmounts
     return () => {
-      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener('scroll', handleScroll);
     };
   }, [pathname]);
   useEffect(() => {
     // Close any open modal
-    const bootstrap = require("bootstrap"); // dynamically import bootstrap
-    const modalElements = document.querySelectorAll(".modal.show");
+    const bootstrap = require('bootstrap'); // dynamically import bootstrap
+    const modalElements = document.querySelectorAll('.modal.show');
     modalElements.forEach((modal) => {
       const modalInstance = bootstrap.Modal.getInstance(modal);
       if (modalInstance) {
@@ -104,7 +104,7 @@ export default function RootLayout({ children }) {
     });
 
     // Close any open offcanvas
-    const offcanvasElements = document.querySelectorAll(".offcanvas.show");
+    const offcanvasElements = document.querySelectorAll('.offcanvas.show');
     offcanvasElements.forEach((offcanvas) => {
       const offcanvasInstance = bootstrap.Offcanvas.getInstance(offcanvas);
       if (offcanvasInstance) {
@@ -114,17 +114,17 @@ export default function RootLayout({ children }) {
   }, [pathname]); // Runs every time the route changes
 
   useEffect(() => {
-    const header = document.querySelector("header");
+    const header = document.querySelector('header');
     if (header) {
-      if (scrollDirection == "up") {
-        header.style.top = "0px";
+      if (scrollDirection == 'up') {
+        header.style.top = '0px';
       } else {
-        header.style.top = "-185px";
+        header.style.top = '-185px';
       }
     }
   }, [scrollDirection]);
   useEffect(() => {
-    const WOW = require("@/utlis/wow");
+    const WOW = require('@/utlis/wow');
     const wow = new WOW.default({
       mobile: false,
       live: false,
@@ -134,19 +134,19 @@ export default function RootLayout({ children }) {
 
   useEffect(() => {
     const initializeDirection = () => {
-      const direction = localStorage.getItem("direction");
+      const direction = localStorage.getItem('direction');
 
       if (direction) {
         const parsedDirection = JSON.parse(direction);
         document.documentElement.dir = parsedDirection.dir;
         document.body.classList.add(parsedDirection.dir);
       } else {
-        document.documentElement.dir = "ltr";
+        document.documentElement.dir = 'ltr';
       }
 
-      const preloader = document.getElementById("preloader");
+      const preloader = document.getElementById('preloader');
       if (preloader) {
-        preloader.classList.add("disabled");
+        preloader.classList.add('disabled');
       }
     };
 
@@ -160,7 +160,7 @@ export default function RootLayout({ children }) {
           <div className="preload-logo">
             <div className="spinner"></div>
           </div>
-        </div>{" "}
+        </div>{' '}
         <Context>
           <div id="wrapper">{children}</div>
           <RtlToggle />
@@ -182,7 +182,7 @@ export default function RootLayout({ children }) {
           <ToolbarBottom />
           <ToolbarShop />
           <NewsletterModal />
-          <ShareModal />{" "}
+          <ShareModal />{' '}
         </Context>
         <ScrollTop />
       </body>
