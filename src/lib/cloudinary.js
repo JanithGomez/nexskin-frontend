@@ -1,5 +1,5 @@
 // src/lib/cloudinary.js
-const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dpi74yx6m';
+const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 
 function buildUrl(publicId, { width, crop, quality, format }) {
   return `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/q_${quality},f_${format},c_${crop},w_${width}/${publicId}`;

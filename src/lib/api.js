@@ -1,7 +1,7 @@
 /* =========================================================
    BASE URL
    ========================================================= */
-const API_BASE_URL = 'http://backend.test/api';
+const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api`;
 
 /* =========================================================
    Helpers
@@ -21,8 +21,18 @@ async function readJson(res) {
 }
 
 /* =========================================================
-   Shared fetch helpers
+   Fetch builders (PUBLIC vs PRIVATE)
    ========================================================= */
+
+// ✅ PUBLIC fetch (cached via Next server cache)
+function publicFetch(url, { revalidate = 60, ...options } = {}) {
+  return fetch(url, {
+    ...options,
+    next: { revalidate },
+  });
+}
+
+// ✅ PRIVATE fetch (token/session, NO cache)
 async function apiFetch(path, options = {}) {
   const token = getToken();
 
@@ -35,7 +45,7 @@ async function apiFetch(path, options = {}) {
       ...(options.headers || {}),
     },
     credentials: 'include', // keep session for guest cart
-    cache: 'no-store',
+    cache: 'no-store', // ✅ correct for auth/session data
   });
 
   const json = await readJson(res);
@@ -56,11 +66,12 @@ export async function apiRegister(payload) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
     body: JSON.stringify(payload),
+    cache: 'no-store',
   });
 
   const json = await readJson(res);
   if (!res.ok) throw new Error(json?.message || 'Register failed');
-  return json; // { user, token }
+  return json;
 }
 
 export async function apiLogin(payload) {
@@ -68,11 +79,12 @@ export async function apiLogin(payload) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
     body: JSON.stringify(payload),
+    cache: 'no-store',
   });
 
   const json = await readJson(res);
   if (!res.ok) throw new Error(json?.message || 'Login failed');
-  return json; // { user, token }
+  return json;
 }
 
 export async function apiMe() {
@@ -96,35 +108,37 @@ export async function apiLogout() {
   const res = await fetch(`${API_BASE_URL}/auth/logout`, {
     method: 'POST',
     headers: { Accept: 'application/json', Authorization: `Bearer ${token}` },
+    cache: 'no-store',
   });
 
   return res.ok;
 }
 
 /* =========================================================
-   NAVBAR
+   NAVBAR (PUBLIC, CACHED)
    ========================================================= */
 export async function fetchNavbar() {
-  const res = await fetch(`${API_BASE_URL}/navbar`, { cache: 'no-store' });
+  const res = await publicFetch(`${API_BASE_URL}/navbar`, { revalidate: 300 }); // 5 min
   if (!res.ok) throw new Error('Failed to fetch navbar data');
   return res.json();
 }
 
 export async function fetchBestSellers(limit = 4) {
-  const res = await fetch(`${API_BASE_URL}/products/best-sellers?limit=${limit}`, { cache: 'no-store' });
+  const res = await publicFetch(`${API_BASE_URL}/products/best-sellers?limit=${limit}`, {
+    revalidate: 300,
+  });
   if (!res.ok) return { products: [] };
   const json = await res.json();
   return { products: json.data ?? [] };
 }
 
 /* =========================================================
-   PRODUCT FILTERS
+   PRODUCT FILTERS (PUBLIC, CACHED)
    ========================================================= */
 export async function fetchProductFilters() {
-  const res = await fetch(`${API_BASE_URL}/product-filters`, { cache: 'no-store' });
+  const res = await publicFetch(`${API_BASE_URL}/product-filters`, { revalidate: 600 }); // 10 min
 
   const json = await readJson(res);
-
   if (!res.ok) {
     const msg =
       json?.message || (json?.errors ? Object.values(json.errors).flat().join(' ') : '') || 'Failed to fetch filters';
@@ -135,44 +149,43 @@ export async function fetchProductFilters() {
 }
 
 /* =========================================================
-   PRODUCTS
+   PRODUCTS (PUBLIC, CACHED)
    ========================================================= */
 export async function fetchAllProducts(filters = {}) {
-  try {
-    const params = new URLSearchParams();
+  const params = new URLSearchParams();
 
-    params.append('page', String(filters.page ?? 1));
-    params.append('per_page', String(filters.per_page ?? 12));
+  params.append('page', String(filters.page ?? 1));
+  params.append('per_page', String(filters.per_page ?? 12));
 
-    if (filters.category_slug) params.append('category_slug', filters.category_slug);
-    if (filters.availability) params.append('availability', filters.availability);
-    if (filters.price_min) params.append('price_min', filters.price_min);
-    if (filters.price_max) params.append('price_max', filters.price_max);
+  if (filters.category_slug) params.append('category_slug', filters.category_slug);
+  if (filters.availability) params.append('availability', filters.availability);
+  if (filters.price_min) params.append('price_min', filters.price_min);
+  if (filters.price_max) params.append('price_max', filters.price_max);
 
-    if (filters.brand_ids?.length) params.append('brand_ids', filters.brand_ids.join(','));
-    if (filters.product_type_ids?.length) params.append('product_type_ids', filters.product_type_ids.join(','));
-    if (filters.skin_type_ids?.length) params.append('skin_type_ids', filters.skin_type_ids.join(','));
-    if (filters.target_group_ids?.length) params.append('target_group_ids', filters.target_group_ids.join(','));
+  if (filters.brand_ids?.length) params.append('brand_ids', filters.brand_ids.join(','));
+  if (filters.product_type_ids?.length) params.append('product_type_ids', filters.product_type_ids.join(','));
+  if (filters.skin_type_ids?.length) params.append('skin_type_ids', filters.skin_type_ids.join(','));
+  if (filters.target_group_ids?.length) params.append('target_group_ids', filters.target_group_ids.join(','));
 
-    const res = await fetch(`${API_BASE_URL}/products?${params.toString()}`, { cache: 'no-store' });
-    if (!res.ok) throw new Error('Failed to fetch products');
+  const url = `${API_BASE_URL}/products?${params.toString()}`;
 
-    const json = await res.json();
-    return { products: json.data ?? [], meta: json.meta ?? null, links: json.links ?? null };
-  } catch (err) {
-    console.error('Fetch Error:', err);
-    return { products: [], meta: null, links: null };
-  }
+  const res = await publicFetch(url, { revalidate: 60 }); // 60 sec
+  if (!res.ok) throw new Error('Failed to fetch products');
+
+  const json = await res.json();
+  return { products: json.data ?? [], meta: json.meta ?? null, links: json.links ?? null };
 }
 
 export async function fetchProductDetails(id) {
-  const res = await fetch(`${API_BASE_URL}/products/${id}`, { cache: 'no-store' });
+  const res = await publicFetch(`${API_BASE_URL}/products/${id}`, { revalidate: 300 }); // 5 min
   if (!res.ok) throw new Error('Failed to fetch product details');
   return res.json();
 }
 
 export async function fetchRelatedProducts(productId, limit = 8) {
-  const res = await fetch(`${API_BASE_URL}/products/related/${productId}?limit=${limit}`, { cache: 'no-store' });
+  const res = await publicFetch(`${API_BASE_URL}/products/related/${productId}?limit=${limit}`, {
+    revalidate: 300,
+  });
   if (!res.ok) return { products: [] };
   const json = await res.json();
   return { products: json.data ?? [] };
@@ -181,7 +194,9 @@ export async function fetchRelatedProducts(productId, limit = 8) {
 export async function fetchProductsByIds(ids = []) {
   if (!ids.length) return { products: [] };
 
-  const res = await fetch(`${API_BASE_URL}/products/by-ids?ids=${ids.join(',')}`, { cache: 'no-store' });
+  const res = await publicFetch(`${API_BASE_URL}/products/by-ids?ids=${ids.join(',')}`, {
+    revalidate: 300,
+  });
   if (!res.ok) return { products: [] };
 
   const json = await res.json();
@@ -189,7 +204,7 @@ export async function fetchProductsByIds(ids = []) {
 }
 
 /* =========================================================
-   CART (SESSION guests + TOKEN users)
+   CART (PRIVATE, NO CACHE)
    ========================================================= */
 export async function fetchCart() {
   return apiFetch('/cart');
@@ -220,7 +235,7 @@ export async function clearCart() {
 }
 
 /* =========================================================
-   CHECKOUT
+   CHECKOUT (PRIVATE)
    ========================================================= */
 export async function placeOrder(payload) {
   return apiFetch('/checkout', {
@@ -231,10 +246,10 @@ export async function placeOrder(payload) {
 }
 
 /* =========================================================
-   SAVED ADDRESSES (logged-in only)
+   SAVED ADDRESSES (PRIVATE)
    ========================================================= */
 export async function fetchSavedAddresses() {
-  return apiFetch('/saved-addresses'); // returns array
+  return apiFetch('/saved-addresses');
 }
 
 export async function createSavedAddress(payload) {
@@ -246,20 +261,17 @@ export async function createSavedAddress(payload) {
 }
 
 export async function deleteSavedAddress(id) {
-  return apiFetch(`/saved-addresses/${id}`, {
-    method: 'DELETE',
-  });
+  return apiFetch(`/saved-addresses/${id}`, { method: 'DELETE' });
 }
 
 /* =========================================================
-   REVIEWS
+   REVIEWS (PRIVATE-ish POST, NO CACHE)
    ========================================================= */
 export async function submitReview(productId, payload) {
   const form = new FormData();
   form.append('rating', String(payload.rating));
   if (payload.review_title) form.append('review_title', payload.review_title);
   if (payload.comment) form.append('comment', payload.comment);
-
   form.append('is_anonymous', payload.is_anonymous ? '1' : '0');
 
   if (!payload.is_anonymous) {
@@ -267,21 +279,22 @@ export async function submitReview(productId, payload) {
     if (payload.guest_email) form.append('guest_email', payload.guest_email);
   }
 
-  if (payload.media?.length) {
-    payload.media.forEach((file) => form.append('media[]', file));
-  }
+  if (payload.media?.length) payload.media.forEach((file) => form.append('media[]', file));
+
+  const token = getToken();
 
   const res = await fetch(`${API_BASE_URL}/products/${productId}/reviews`, {
     method: 'POST',
-    headers: { Accept: 'application/json' },
+    headers: {
+      Accept: 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    credentials: 'include',
+    cache: 'no-store',
     body: form,
   });
 
-  const text = await res.text();
-  let json = {};
-  try {
-    json = text ? JSON.parse(text) : {};
-  } catch {}
+  const json = await readJson(res);
 
   if (!res.ok) {
     const msg =
@@ -293,9 +306,8 @@ export async function submitReview(productId, payload) {
 }
 
 /* =========================================================
-   My ACCOUNT - ORDERS (AUTH REQUIRED)
+   MY ACCOUNT - ORDERS (PRIVATE)
    ========================================================= */
-
 export async function fetchMyOrders(page = 1, perPage = 10) {
   return apiFetch(`/my/orders?page=${page}&per_page=${perPage}`);
 }

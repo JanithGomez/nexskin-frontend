@@ -1,6 +1,7 @@
 // src/lib/auth.js
 import { fetchCart } from '@/src/lib/api';
-const BASE_URL = 'http://backend.test';
+
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 const API_URL = `${BASE_URL}/api`;
 
 function setToken(token) {
