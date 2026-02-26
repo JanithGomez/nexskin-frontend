@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useContextElement } from '@/context/Context';
+import { apiLogout } from '@/src/lib/api';
 
 const accountLinks = [
   { href: '/my-account', label: 'Dashboard' },
@@ -14,19 +14,38 @@ const accountLinks = [
 export default function DashboardNav() {
   const pathname = usePathname();
   const router = useRouter();
-  const { logout } = useContextElement();
 
   const handleLogout = async (e) => {
     e.preventDefault();
-    await logout();
-    router.push('/login');
+
+    try {
+      // ✅ backend logout
+      await apiLogout();
+
+      // ✅ clear auth storage
+      localStorage.removeItem('auth_user');
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('token'); // legacy safety
+
+      // ✅ notify all components
+      window.dispatchEvent(new Event('auth:changed'));
+
+      // ✅ refresh current UI state
+      router.refresh();
+
+      // ✅ go to login page
+      router.push('/login');
+    } catch (err) {
+      console.error('Logout failed:', err);
+      alert(err?.message || 'Logout failed');
+    }
   };
 
   return (
     <ul className="my-account-nav">
       {accountLinks.map((link, index) => (
         <li key={index}>
-          <Link href={link.href} className={`my-account-nav-item ${pathname == link.href ? 'active' : ''}`}>
+          <Link href={link.href} className={`my-account-nav-item ${pathname === link.href ? 'active' : ''}`}>
             {link.label}
           </Link>
         </li>

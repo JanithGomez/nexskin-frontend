@@ -260,6 +260,14 @@ export async function createSavedAddress(payload) {
   });
 }
 
+export async function updateSavedAddress(id, payload) {
+  return apiFetch(`/saved-addresses/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+}
+
 export async function deleteSavedAddress(id) {
   return apiFetch(`/saved-addresses/${id}`, { method: 'DELETE' });
 }

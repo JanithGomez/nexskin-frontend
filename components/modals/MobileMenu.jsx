@@ -1,140 +1,3 @@
-// 'use client';
-// import React, { useEffect, useState } from 'react';
-// import Link from 'next/link';
-// import LanguageSelect from '../common/LanguageSelect';
-// import CurrencySelect from '../common/CurrencySelect';
-// import { fetchNavbar } from '../../src/lib/api';
-
-// export default function MobileMenu() {
-//   const [menus, setMenus] = useState([]);
-
-//   useEffect(() => {
-//     fetchNavbar().then(setMenus).catch(console.error);
-//   }, []);
-
-//   return (
-//     <div className="offcanvas offcanvas-start canvas-mb" id="mobileMenu">
-//       <span className="icon-close icon-close-popup" data-bs-dismiss="offcanvas" aria-label="Close" />
-
-//       <div className="mb-canvas-content">
-//         <div className="mb-body">
-//           <ul className="nav-ul-mb" id="wrapper-menu-navigation">
-//             {menus.map((mainMenu, i) => {
-//               const mainId = `mb-main-${i}`;
-
-//               return (
-//                 <li key={i} className="nav-mb-item">
-//                   {/* ✅ row: left = link, right = toggle */}
-//                   <div className="d-flex align-items-center justify-content-between">
-//                     <Link
-//                       href={mainMenu.href || '#'}
-//                       className="mb-menu-link"
-//                       data-bs-dismiss="offcanvas"
-//                       style={{ flex: 1 }}>
-//                       {mainMenu.label}
-//                     </Link>
-
-//                     <a
-//                       href={`#${mainId}`}
-//                       className="btn-open-sub"
-//                       data-bs-toggle="collapse"
-//                       aria-expanded="false"
-//                       aria-controls={mainId}
-//                       onClick={(e) => e.preventDefault()}
-//                       style={{ width: 42, textAlign: 'right' }}
-//                     />
-//                   </div>
-
-//                   <div id={mainId} className="collapse">
-//                     <ul className="sub-nav-menu">
-//                       {mainMenu.menu.map((col, j) => {
-//                         const colId = `mb-col-${i}-${j}`;
-
-//                         return (
-//                           <li key={j}>
-//                             <div className="d-flex align-items-center justify-content-between">
-//                               {/* ✅ level 2 link */}
-//                               <Link
-//                                 href={col.href || '#'}
-//                                 className="sub-nav-link"
-//                                 data-bs-dismiss="offcanvas"
-//                                 style={{ flex: 1 }}>
-//                                 {col.heading}
-//                               </Link>
-
-//                               {/* toggle level 2 children */}
-//                               <a
-//                                 href={`#${colId}`}
-//                                 className="btn-open-sub"
-//                                 data-bs-toggle="collapse"
-//                                 aria-expanded="false"
-//                                 aria-controls={colId}
-//                                 onClick={(e) => e.preventDefault()}
-//                                 style={{ width: 42, textAlign: 'right' }}
-//                               />
-//                             </div>
-
-//                             <div id={colId} className="collapse">
-//                               <ul className="sub-nav-menu sub-menu-level-2">
-//                                 {col.links.map((link, k) => (
-//                                   <li key={k}>
-//                                     <Link href={link.href} className="sub-nav-link" data-bs-dismiss="offcanvas">
-//                                       {link.text}
-//                                     </Link>
-//                                   </li>
-//                                 ))}
-//                               </ul>
-//                             </div>
-//                           </li>
-//                         );
-//                       })}
-//                     </ul>
-//                   </div>
-//                 </li>
-//               );
-//             })}
-//           </ul>
-
-//           <div className="mb-other-content">
-//             <div className="d-flex group-icon">
-//               <Link href={`/wishlist`} className="site-nav-icon" data-bs-dismiss="offcanvas">
-//                 <i className="icon icon-heart" />
-//                 Wishlist
-//               </Link>
-//               <Link href={`/home-search`} className="site-nav-icon" data-bs-dismiss="offcanvas">
-//                 <i className="icon icon-search" />
-//                 Search
-//               </Link>
-//             </div>
-
-//             <div className="mb-notice">
-//               <Link href={`/contact-1`} className="text-need" data-bs-dismiss="offcanvas">
-//                 Need help ?
-//               </Link>
-//             </div>
-//           </div>
-//         </div>
-
-//         <div className="mb-bottom">
-//           <Link href={`/login`} className="site-nav-icon" data-bs-dismiss="offcanvas">
-//             <i className="icon icon-account" />
-//             Login
-//           </Link>
-
-//           <div className="bottom-bar-language">
-//             <div className="tf-currencies">
-//               <CurrencySelect />
-//             </div>
-//             <div className="tf-languages">
-//               <LanguageSelect parentClassName={'image-select center style-default type-languages'} />
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
-
 'use client';
 
 import React, { useEffect, useState, useCallback } from 'react';
@@ -142,14 +5,35 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import LanguageSelect from '../common/LanguageSelect';
 import CurrencySelect from '../common/CurrencySelect';
-import { fetchNavbar } from '../../src/lib/api';
+import { fetchNavbar, apiLogout } from '../../src/lib/api';
 
 export default function MobileMenu() {
   const [menus, setMenus] = useState([]);
+  const [user, setUser] = useState(null);
+  const [loggingOut, setLoggingOut] = useState(false);
+
   const router = useRouter();
+
+  const loadAuthFromStorage = () => {
+    try {
+      const rawUser = localStorage.getItem('auth_user');
+      setUser(rawUser ? JSON.parse(rawUser) : null);
+    } catch {
+      setUser(null);
+    }
+  };
 
   useEffect(() => {
     fetchNavbar().then(setMenus).catch(console.error);
+  }, []);
+
+  useEffect(() => {
+    loadAuthFromStorage();
+
+    const handler = () => loadAuthFromStorage();
+    window.addEventListener('auth:changed', handler);
+
+    return () => window.removeEventListener('auth:changed', handler);
   }, []);
 
   const hideOffcanvas = useCallback(() => {
@@ -171,6 +55,34 @@ export default function MobileMenu() {
     },
     [router, hideOffcanvas],
   );
+
+  const handleLogout = useCallback(async () => {
+    try {
+      setLoggingOut(true);
+
+      // ✅ backend logout (token) - apiLogout reads auth_token internally
+      await apiLogout();
+
+      // ✅ clear auth keys used by Login/Register
+      localStorage.removeItem('auth_user');
+      localStorage.removeItem('auth_token');
+
+      // ✅ cleanup old key if you ever used it
+      localStorage.removeItem('token');
+
+      setUser(null);
+
+      window.dispatchEvent(new Event('auth:changed'));
+
+      // ✅ navigate away (optional)
+      go('/');
+    } catch (e) {
+      console.error(e);
+      alert(e?.message || 'Logout failed');
+    } finally {
+      setLoggingOut(false);
+    }
+  }, [go]);
 
   return (
     <div className="offcanvas offcanvas-start canvas-mb" id="mobileMenu">
@@ -278,7 +190,7 @@ export default function MobileMenu() {
               );
             })}
 
-            {/* Optional static links (use router push too if you want) */}
+            {/* Optional static links */}
             <li className="nav-mb-item">
               <a
                 href="/shop-default"
@@ -302,7 +214,7 @@ export default function MobileMenu() {
                   go('/wishlist');
                 }}>
                 <i className="icon icon-heart" />
-                Wishlistttt
+                Wishlist
               </a>
 
               <a
@@ -332,16 +244,44 @@ export default function MobileMenu() {
         </div>
 
         <div className="mb-bottom">
-          <a
-            href="/login"
-            className="site-nav-icon"
-            onClick={(e) => {
-              e.preventDefault();
-              go('/login');
-            }}>
-            <i className="icon icon-account" />
-            Login
-          </a>
+          {/* ✅ Auth section */}
+          {!user ? (
+            <a
+              href="/login"
+              className="site-nav-icon"
+              onClick={(e) => {
+                e.preventDefault();
+                go('/login');
+              }}>
+              <i className="icon icon-account" />
+              Login
+            </a>
+          ) : (
+            <div className="d-flex flex-column gap-2">
+              <a
+                href="/my-account"
+                className="site-nav-icon"
+                onClick={(e) => {
+                  e.preventDefault();
+                  go('/my-account');
+                }}>
+                <i className="icon icon-account" />
+                My Account
+              </a>
+
+              <a
+                href="#"
+                className="site-nav-icon text-danger"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (!loggingOut) handleLogout();
+                }}
+                style={{ cursor: loggingOut ? 'not-allowed' : 'pointer' }}>
+                <i className="icon icon-logout" />
+                {loggingOut ? 'Logging out...' : 'Logout'}
+              </a>
+            </div>
+          )}
 
           <div className="bottom-bar-language">
             <div className="tf-currencies">
