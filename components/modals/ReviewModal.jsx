@@ -105,8 +105,7 @@ export default function ReviewModal() {
           {/* ✅ header like other modals */}
           <div className="header">
             <div className="demo-title">Write a review</div>
-
-            {/* ✅ close icon like FindSize */}
+            
             <span
               className="icon-close icon-close-popup"
               data-bs-dismiss="modal"

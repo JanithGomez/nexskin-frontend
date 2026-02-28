@@ -23,7 +23,7 @@ export default function Products() {
               defaultValue=""
               aria-required="true"
             />
-          </fieldset>
+          </fieldset> 
           <button className="" type="submit">
             <i className="icon-search" />
           </button>

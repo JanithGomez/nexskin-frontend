@@ -5,7 +5,7 @@ export default function FlatTitle() {
     <section className="flat-spacing-9">
       <div className="container">
         <div className="flat-title my-0">
-          <span className="title">We are Ecomus</span>
+          <span className="title">We are NexSkin</span>
           <p className="sub-title text_black-2">
             Welcome to our classic women's clothing store, where we believe
             <br className="d-xl-block d-none" />

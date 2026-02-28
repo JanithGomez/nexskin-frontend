@@ -1,24 +1,25 @@
-import Footer1 from "@/components/footers/Footer1";
-import Header2 from "@/components/headers/Header2";
+import Footer1 from '@/components/footers/Footer1';
+import Header2 from '@/components/headers/Header2';
 
-import Products from "@/components/shopDetails/Products";
-import RecentProducts from "@/components/shopDetails/RecentProducts";
-import ShopDetailsTab from "@/components/shopDetails/ShopDetailsTab";
+import Products from '@/components/shopDetails/Products';
+import RecentProducts from '@/components/shopDetails/RecentProducts';
+import ShopDetailsTab from '@/components/shopDetails/ShopDetailsTab';
 
-import React from "react";
-import Link from "next/link";
+import React from 'react';
+import Link from 'next/link';
 
-import DetailsOuterZoom from "@/components/shopDetails/DetailsOuterZoom";
-import ProductSinglePrevNext from "@/components/common/ProductSinglePrevNext";
+import DetailsOuterZoom from '@/components/shopDetails/DetailsOuterZoom';
+import ProductSinglePrevNext from '@/components/common/ProductSinglePrevNext';
 
-import { fetchProductDetails } from "@/src/lib/api";
+import { fetchProductDetails } from '@/src/lib/api';
+import DetailsMagnifierZoom from '@/components/shopDetails/DetailsMagnifierZoom';
 
 export const metadata = {
-  title: "Product Details",
-  description: "Product Details",
+  title: 'Product Details',
+  description: 'Product Details',
 };
 
-  export default async function Page(props) {
+export default async function Page(props) {
   const params = await props.params;
   const id = params.id;
 
@@ -62,6 +63,7 @@ export const metadata = {
         </div>
       </div>
       <DetailsOuterZoom product={product} />
+      {/* <DetailsMagnifierZoom product={product} /> */}
       <ShopDetailsTab product={product} />
       <Products currentId={product.id} />
       <RecentProducts currentId={product.id} />

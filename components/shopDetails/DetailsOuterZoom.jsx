@@ -13,6 +13,7 @@ import { useContextElement } from '@/context/Context';
 import { openCartModal } from '@/utlis/openCartModal';
 
 import { cldMain, cldThumb, productPlaceholder } from '@/src/lib/cloudinary';
+import Slider1ZoomMagnifier from './sliders/Slider1ZoomMagnifier';
 
 export default function DetailsOuterZoom({ product = allProducts[0] }) {
   const [currentColor, setCurrentColor] = useState(colors[0]);
@@ -85,7 +86,7 @@ export default function DetailsOuterZoom({ product = allProducts[0] }) {
             <div className="col-md-6">
               <div className="tf-product-media-wrap sticky-top">
                 <div className="thumbs-slider">
-                  <Slider1ZoomOuter
+                  <Slider1ZoomMagnifier
                     handleColor={handleColor}
                     currentColor={currentColor.value}
                     firstImage={galleryImages?.[0]?.src}

@@ -206,24 +206,7 @@ export default function MobileMenu() {
 
           <div className="mb-other-content">
             <div className="d-flex group-icon">
-              <a
-                href="/wishlist"
-                className="site-nav-icon"
-                onClick={(e) => {
-                  e.preventDefault();
-                  go('/wishlist');
-                }}>
-                <i className="icon icon-heart" />
-                Wishlist
-              </a>
-
-              <a
-                href="/home-search"
-                className="site-nav-icon"
-                onClick={(e) => {
-                  e.preventDefault();
-                  go('/home-search');
-                }}>
+              <a href="#canvasSearch" data-bs-toggle="offcanvas" className="site-nav-icon">
                 <i className="icon icon-search" />
                 Search
               </a>

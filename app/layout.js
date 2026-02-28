@@ -15,7 +15,7 @@ import AskQuestion from '@/components/modals/AskQuestion';
 import BlogSidebar from '@/components/modals/BlogSidebar';
 import ColorCompare from '@/components/modals/ColorCompare';
 import DeliveryReturn from '@/components/modals/DeliveryReturn';
-import FindSize from '@/components/modals/FindSize';
+// import FindSize from '@/components/modals/FindSize';
 import Login from '@/components/modals/Login';
 import MobileMenu from '@/components/modals/MobileMenu';
 import Register from '@/components/modals/Register';
@@ -172,7 +172,7 @@ export default function RootLayout({ children }) {
           <BlogSidebar />
           <ColorCompare />
           <DeliveryReturn />
-          <FindSize />
+          {/* <FindSize /> */}
           <ReviewModal />
           <Login />
           <MobileMenu />
