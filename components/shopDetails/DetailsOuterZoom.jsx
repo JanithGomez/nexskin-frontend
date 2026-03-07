@@ -86,7 +86,7 @@ export default function DetailsOuterZoom({ product = allProducts[0] }) {
             <div className="col-md-6">
               <div className="tf-product-media-wrap sticky-top">
                 <div className="thumbs-slider">
-                  <Slider1ZoomMagnifier
+                  <DetailsOuterZoom
                     handleColor={handleColor}
                     currentColor={currentColor.value}
                     firstImage={galleryImages?.[0]?.src}

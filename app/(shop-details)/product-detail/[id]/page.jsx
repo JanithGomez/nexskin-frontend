@@ -63,7 +63,6 @@ export default async function Page(props) {
         </div>
       </div>
       <DetailsOuterZoom product={product} />
-      {/* <DetailsMagnifierZoom product={product} /> */}
       <ShopDetailsTab product={product} />
       <Products currentId={product.id} />
       <RecentProducts currentId={product.id} />
